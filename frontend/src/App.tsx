@@ -1,13 +1,18 @@
 import './App.css'
-import { ChatWindow } from './components/ChatWindow'
+import { BrowserRouter as Router, Routes,Route } from 'react-router-dom'
 import { JoinWindow } from './components/JoinWindow'
+import { ChatWindow } from './components/ChatWindow'
 
 function App() {
 
   return (
     <>
-      <JoinWindow/>
-      <ChatWindow/>
+      <Router>
+        <Routes>
+          <Route path='/' element={<JoinWindow/>}/>
+          <Route path='/chat' element={<ChatWindow/>}/>
+        </Routes>
+      </Router>
     </>
   )
 }

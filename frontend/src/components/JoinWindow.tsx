@@ -1,8 +1,11 @@
 import { useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 export const JoinWindow = () => {
   const roomRef = useRef<HTMLInputElement>(null);
   const [socket, setSocket] = useState<WebSocket | null>(null);
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     const ws = new WebSocket("ws://localhost:8080");
@@ -20,12 +23,6 @@ export const JoinWindow = () => {
     };
 
     setSocket(ws);
-
-    return () => {
-      if (ws.readyState === WebSocket.OPEN) {
-        ws.close();
-      }
-    };
   }, []); 
 
   const handleEntry = () => {
@@ -39,7 +36,8 @@ export const JoinWindow = () => {
             roomId: roomRef.current ? roomRef.current.value : "",
           },
         })
-      );
+      )
+      navigate("/chat");
     } else {
       console.error("WebSocket is not open yet.");
     }
