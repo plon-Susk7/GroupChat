@@ -1,6 +1,13 @@
 
+import { useNavigate } from "react-router-dom";
+import { socketState } from "../atoms/Socket";
+import { useSetRecoilState} from "recoil";
+import { roomIdState } from "../atoms/RoomId";
 
 export const JoinWindow = () => {
+  const navigate = useNavigate();
+  const setSocket = useSetRecoilState(socketState);
+  const setRoomId = useSetRecoilState(roomIdState);
 
   const generateRandomWord = () => {
     const letters = 'abcdefghijklmnopqrstuvwxyz';
@@ -16,6 +23,7 @@ export const JoinWindow = () => {
   
   const createRoom = () => {
       const socket = new WebSocket("ws://localhost:8081");
+      
       const randomRoomId = generateRandomWord();
       socket.onopen = () => {
           const message = JSON.stringify({
@@ -23,8 +31,11 @@ export const JoinWindow = () => {
               payload : {
                   roomId : randomRoomId
               }
-          })
-
+          });
+          //@ts-ignore
+          setSocket(socket);
+          setRoomId(randomRoomId);
+          
           socket.send(message);
       }
 
@@ -39,6 +50,8 @@ export const JoinWindow = () => {
       socket.onclose = (event) => {
           console.log(event);
       }
+
+      navigate('/chat');
 
   }
 
