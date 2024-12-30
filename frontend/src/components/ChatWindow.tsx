@@ -1,8 +1,23 @@
-// import { useState } from "react";
+import { useRecoilValue } from "recoil";
+import { socketState } from "../atoms/Socket";
+import { useRef } from "react";
 
 export const ChatWindow = () => {
 
-    // const [messages, setMessages] = useState([]);
+    const socket = useRecoilValue(socketState) as WebSocket | null;
+    const chatBoxRef = useRef<HTMLInputElement>(null);
+    const sendMessage = () => {
+
+        const message = JSON.stringify({
+            type : "chat",
+            payload : {
+                message : chatBoxRef.current?.value
+            }
+        });
+
+        socket?.send(message);
+    }
+    
 
     return (
       <div className="bg-gray-800 text-white h-screen flex flex-col items-center p-4">
@@ -14,11 +29,12 @@ export const ChatWindow = () => {
   
         <div className="flex w-full max-w-3xl items-center space-x-2">
           <input
+            ref = {chatBoxRef}
             type="text"
             placeholder="Type a message..."
             className="flex-grow p-3 rounded-md bg-gray-600 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
-          <button className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-md font-semibold transition">
+          <button onClick={()=>sendMessage()} className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-md font-semibold transition">
             Send
           </button>
         </div>

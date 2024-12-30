@@ -1,68 +1,72 @@
-import { useEffect, useRef } from "react";
+
 import { useNavigate } from "react-router-dom";
-import { useRecoilState } from "recoil";
 import { socketState } from "../atoms/Socket";
+import { useSetRecoilState} from "recoil";
+import { roomIdState } from "../atoms/RoomId";
 
 export const JoinWindow = () => {
-  const roomRef = useRef<HTMLInputElement>(null);
-  const [socket, setSocket] = useRecoilState(socketState);
   const navigate = useNavigate();
+  const setSocket = useSetRecoilState(socketState);
+  const setRoomId = useSetRecoilState(roomIdState);
 
-  useEffect(() => {
-    // Check if socket is already set
-    if (!socket) {
-      const ws = new WebSocket("ws://localhost:8080");
-
-      ws.onopen = () => {
-        console.log("WebSocket connection established");
-      };
-
-      ws.onerror = (error) => {
-        console.error("WebSocket error:", error);
-      };
-
-      ws.onclose = () => {
-        console.log("WebSocket connection closed");
-      };
-
-      //@ts-ignore
-      setSocket(ws);
+  const generateRandomWord = () => {
+    const letters = 'abcdefghijklmnopqrstuvwxyz';
+    let word = '';
+    
+    for (let i = 0; i < 6; i++) {
+      const randomIndex = Math.floor(Math.random() * letters.length);
+      word += letters[randomIndex];
     }
-  }, [socket, setSocket]); // Only create the WebSocket if it doesn't exist
-
-  const handleEntry = () => {
-    const roomId = roomRef.current ? roomRef.current.value : "";
-
-    if (!roomId) {
-      console.error("Room ID is required.");
-      return;
-    }
-
-    //@ts-ignore
-    if (socket && socket.readyState === WebSocket.OPEN) {
-      console.log("Joining room");
-      
-      //@ts-ignore
-      socket.send(
-        JSON.stringify({
-          type: "join",
-          payload: {
-            roomId: roomId,
-          },
-        })
-      );
-      navigate("/chat");
-    } else {
-      console.error("WebSocket is not open yet.");
-    }
+    
+    return word;
   };
+  
+  const createRoom = () => {
+      const socket = new WebSocket("ws://localhost:8081");
+      
+      const randomRoomId = generateRandomWord();
+      socket.onopen = () => {
+          const message = JSON.stringify({
+              type : "join",
+              payload : {
+                  roomId : randomRoomId
+              }
+          });
+          //@ts-ignore
+          setSocket(socket);
+          setRoomId(randomRoomId);
+          
+          socket.send(message);
+      }
+
+      socket.onmessage = (event) => {
+          console.log("Message from server", event.data);
+      }
+
+      socket.onerror = (event) => {
+          console.log(event);
+      }
+
+      socket.onclose = (event) => {
+          console.log(event);
+      }
+
+      navigate('/chat');
+
+  }
 
   return (
     <>
-      <div>
-        <h1>Enter room code</h1>
-        <input ref={roomRef} type="text" placeholder="Enter room code" />
-        <button onClick={handleEntry}>Join</button>
+      <div className="flex flex-col justify-center min-h-screen items-center bg-gray-500">
+        <div className="flex flex-col items-center gap-2">
+          <h1 className="font-sans text-lg text-white">Enter room code</h1>
+          <input className="border rounded-lg p-1 bg-gray-700" type="text" placeholder="Enter room code" />
+          <button className="border focus:outline-none text-white bg-purple-700 hover:bg-purple-800 focus:ring-4 focus:ring-purple-300 font-medium rounded-lg text-sm px-5 py-1 mb-2 dark:bg-purple-600 dark:hover:bg-purple-700 dark:focus:ring-purple-900">Join</button>
+        </div>
+
+        <div>
+          <button onClick={()=> createRoom()} className="border focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-1 me-2 mb-2 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800">Create New Room</button>
+        </div>
       </div>
     </>
   );
