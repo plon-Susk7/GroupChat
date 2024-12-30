@@ -8,6 +8,18 @@ interface User{
 }
 
 
+/*
+    API format 
+
+    {
+        type : "join" | "chat",
+        payload : {
+            roomId : string, for join
+            message : string, for chat
+        }
+    }
+
+*/
 
 let allSockets : User[] = [];
 
