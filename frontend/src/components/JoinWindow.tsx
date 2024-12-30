@@ -1,5 +1,47 @@
+
+
 export const JoinWindow = () => {
+
+  const generateRandomWord = () => {
+    const letters = 'abcdefghijklmnopqrstuvwxyz';
+    let word = '';
+    
+    for (let i = 0; i < 6; i++) {
+      const randomIndex = Math.floor(Math.random() * letters.length);
+      word += letters[randomIndex];
+    }
+    
+    return word;
+  };
   
+  const createRoom = () => {
+      const socket = new WebSocket("ws://localhost:8081");
+      const randomRoomId = generateRandomWord();
+      socket.onopen = () => {
+          const message = JSON.stringify({
+              type : "join",
+              payload : {
+                  roomId : randomRoomId
+              }
+          })
+
+          socket.send(message);
+      }
+
+      socket.onmessage = (event) => {
+          console.log("Message from server", event.data);
+      }
+
+      socket.onerror = (event) => {
+          console.log(event);
+      }
+
+      socket.onclose = (event) => {
+          console.log(event);
+      }
+
+  }
+
   return (
     <>
       <div className="flex flex-col justify-center min-h-screen items-center bg-gray-500">
@@ -10,7 +52,7 @@ export const JoinWindow = () => {
         </div>
 
         <div>
-          <button className="border focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-1 me-2 mb-2 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800">Create New Room</button>
+          <button onClick={()=> createRoom()} className="border focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-1 me-2 mb-2 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800">Create New Room</button>
         </div>
       </div>
     </>
