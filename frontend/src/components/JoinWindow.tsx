@@ -51,6 +51,9 @@ export const JoinWindow = () => {
       console.log(event);
     }
 
+    setTimeout(()=>{
+      console.log("Navigating to chat window");
+    },2000)
     navigate('/chat');
   }
 
