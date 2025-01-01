@@ -19,6 +19,7 @@ export const ChatWindow = () => {
         });
 
         socket?.send(message);
+        chatBoxRef.current!.value = "";
     }
 
     setTimeout(()=>{
